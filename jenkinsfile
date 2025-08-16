@@ -1,0 +1,109 @@
+pipeline {
+  agent any
+
+  environment {
+    TF_DIR       = '.'                              // change if terraform files are in a subfolder
+    GITHUB_REPO  = 'Devops-striker/three-tier-web-architechture'
+  }
+
+  options {
+    ansiColor('xterm')
+    timestamps()
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Prepare AWS Profile') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'aws-access-key-id',     variable: 'AWS_ACCESS_KEY_ID'),
+          string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY'),
+          string(credentialsId: 'aws-session-token',     variable: 'AWS_SESSION_TOKEN')
+        ]) {
+          sh '''
+            set -eu
+            mkdir -p ~/.aws
+            cat > ~/.aws/credentials <<'EOF'
+[sitlsandbox]
+aws_access_key_id=${AWS_ACCESS_KEY_ID}
+aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+aws_session_token=${AWS_SESSION_TOKEN}
+EOF
+            cat > ~/.aws/config <<'EOF'
+[profile sitlsandbox]
+region = ap-south-1
+output = json
+EOF
+          '''
+        }
+      }
+    }
+
+    stage('Terraform Init & Validate') {
+      steps {
+        dir("${env.TF_DIR}") {
+          sh 'terraform --version'
+          sh 'terraform init -input=false'
+          sh 'terraform validate'
+        }
+      }
+    }
+
+    stage('Terraform Plan (PRs & feature branches)') {
+      when {
+        anyOf {
+          changeRequest()
+          not { branch 'main' }
+        }
+      }
+      steps {
+        dir("${env.TF_DIR}") {
+          // capture plan but never fail the shell so we can always post output
+          sh 'terraform plan -no-color -out=tfplan > plan.txt || true'
+          script {
+            def planOut = readFile('plan.txt')
+            // shorten super-long outputs so GitHub comment doesn’t explode
+            planOut = planOut.take(60000)
+            withCredentials([string(credentialsId: 'github-token', variable: 'GHTOKEN')]) {
+              sh """
+                curl -sS -H "Authorization: token ${GHTOKEN}" \
+                  -H "Accept: application/vnd.github+json" \
+                  -X POST \
+                  https://api.github.com/repos/${GITHUB_REPO}/issues/${env.CHANGE_ID}/comments \
+                  -d @- <<'JSON'
+{
+  "body": "### ✅ Terraform Plan (Jenkins)\\n\\n\\n\\n\\
+\`\`\`\\n${planOut.replace("\\","\\\\").replace("\"","\\\"")}\\n\\
+\`\`\`"
+}
+JSON
+              """
+            }
+          }
+          // finally, fail the build if plan actually failed
+          sh 'terraform show -no-color tfplan > /dev/null'
+        }
+      }
+    }
+
+    stage('Terraform Apply (main only)') {
+      when { branch 'main' }
+      steps {
+        dir("${env.TF_DIR}") {
+          sh 'terraform plan -out=tfplan'
+          sh 'terraform apply -auto-approve tfplan'
+        }
+      }
+    }
+  }
+
+  post {
+    success { echo '✅ Pipeline succeeded.' }
+    failure { echo '❌ Pipeline failed. Check console output.' }
+  }
+}
