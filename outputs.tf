@@ -14,11 +14,15 @@ output "db_subnets" {
   value = module.vpc.db_subnets
 }
 
-output "nat_gateway_id" {
-  value = module.vpc.nat_gateway_id
+output "nat_gateway_ids" {
+  value = module.vpc.nat_gateway_ids
 }
 
 output "igw_id" {
   description = "The ID of igw"
   value = module.vpc.igw_id
+}
+output "public_route_table_id" {
+  description = "The ID of the public route table."
+  value       = module.routing.public_route_table_id
 }

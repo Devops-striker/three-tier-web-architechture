@@ -19,7 +19,10 @@ output "igw_id" {
   value = aws_internet_gateway.igw.id
 }
 
-output "nat_gateway_id" {
-  description = "The IDs of the NAT gateways."
-  value       = aws_nat_gateway.nat[*].id
+output "nat_gateway_ids" {
+  description = "IDs of both NAT Gateways"
+  value = [
+    aws_nat_gateway.nat.id,
+    aws_nat_gateway.nat2.id
+  ]
 }
