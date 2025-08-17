@@ -69,3 +69,17 @@ resource "aws_nat_gateway" "nat" {
     Name = "nat-gateway"
   }
 }
+# Elastic IP for NAT2
+resource "aws_eip" "nat2" {
+  domain = "vpc"
+}
+
+# NAT Gateway in first public subnet
+resource "aws_nat_gateway" "nat2" {
+  allocation_id = aws_eip.nat2.id
+  subnet_id     = aws_subnet.public[1].id
+
+  tags = {
+    Name = "nat-gateway-2"
+  }
+}

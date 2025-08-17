@@ -15,5 +15,6 @@ output "db_subnets" {
 }
 
 output "nat_gateway_id" {
-  value = aws_nat_gateway.nat.id
+  description = "The IDs of the NAT gateways."
+  value       = aws_nat_gateway.nat[*].id
 }
