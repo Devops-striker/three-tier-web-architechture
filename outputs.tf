@@ -26,3 +26,6 @@ output "public_route_table_id" {
   description = "The ID of the public route table."
   value       = module.routing.public_route_table_id
 }
+output "private_route_table_ids" {
+  value = module.routing.private_route_table_ids
+}
