@@ -15,3 +15,8 @@ module "routing" {
   private_subnet_ids  = module.vpc.private_subnets
   nat_gateway_ids     = module.vpc.nat_gateway_ids
 }
+module "sg" {
+  source = "./modules/sg"
+  vpc_id = module.vpc.vpc_id
+  my_ip  = var.my_ip
+}

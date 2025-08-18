@@ -29,3 +29,22 @@ output "public_route_table_id" {
 output "private_route_table_ids" {
   value = module.routing.private_route_table_ids
 }
+output "alb_sg_id" {
+  value = module.sg.alb_sg_id
+}
+
+output "web_sg_id" {
+  value = module.sg.web_sg_id
+}
+
+output "internal_alb_sg_id" {
+  value = module.sg.internal_alb_sg_id
+}
+
+output "app_sg_id" {
+  value = module.sg.app_sg_id
+}
+
+output "db_sg_id" {
+  value = module.sg.db_sg_id
+}

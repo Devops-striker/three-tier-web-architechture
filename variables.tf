@@ -28,3 +28,7 @@ variable "db_subnet_cidrs" {
   description = "CIDRs for database subnets"
   type        = list(string)
 }
+variable "my_ip" {
+  description = "Your IP address in CIDR notation"
+  type        = string
+}
