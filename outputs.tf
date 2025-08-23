@@ -48,3 +48,56 @@ output "app_sg_id" {
 output "db_sg_id" {
   value = module.sg.db_sg_id
 }
+output "db_writer_endpoint" {
+  description = "Writer endpoint of the Aurora cluster"
+  value       = module.db_tier.db_writer_endpoint
+}
+
+output "db_reader_endpoint" {
+  description = "Reader endpoint of the Aurora cluster"
+  value       = module.db_tier.db_reader_endpoint
+}
+
+output "db_cluster_id" {
+  description = "Aurora Cluster Identifier"
+  value       = module.db_tier.db_cluster_id
+}
+
+output "ec2_role_name" {
+  value = module.ec2_iam_role.role_name
+}
+
+output "ec2_instance_profile" {
+  value = module.ec2_iam_role.instance_profile
+}
+output "app_instance_id" {
+  description = "ID of the app tier EC2 instance"
+  value       = module.app_tier.app_instance_id
+}
+
+output "app_private_ip" {
+  description = "Private IP of the app tier EC2 instance"
+  value       = module.app_tier.app_private_ip
+}
+output "web_instance_id" {
+  description = "ID of the web tier EC2 instance"
+  value       = module.web_tier.web_instance_id
+}
+
+output "web_public_ip" {
+  description = "Public IP of the web tier EC2 instance"
+  value       = module.web_tier.web_public_ip
+}
+output "app_ami_id" {
+  value = module.ami_builder.app_ami_id
+}
+
+output "web_ami_id" {
+  value = module.ami_builder.web_ami_id
+}
+output "internal_alb_dns" {
+  value = module.internal_alb_asg.internal_alb_dns
+}
+output "external_alb_dns" {
+  value = module.external_alb_asg.external_alb_dns
+}
